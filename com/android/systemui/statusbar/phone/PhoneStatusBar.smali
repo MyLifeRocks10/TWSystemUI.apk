@@ -14,6 +14,7 @@
         Lcom/android/systemui/statusbar/phone/PhoneStatusBar$KidsModeObserver;,
         Lcom/android/systemui/statusbar/phone/PhoneStatusBar$FastColorDrawable;,
         Lcom/android/systemui/statusbar/phone/PhoneStatusBar$MyTicker;,
+        Lcom/android/systemui/statusbar/phone/PhoneStatusBar$SettingsObserver;,
         Lcom/android/systemui/statusbar/phone/PhoneStatusBar$H;,
         Lcom/android/systemui/statusbar/phone/PhoneStatusBar$LongLifeModeObserver;
     }
@@ -9864,6 +9865,16 @@
 
     move-object/from16 v0, p0
 
+    new-instance v10, Lcom/android/systemui/statusbar/phone/PhoneStatusBar$SettingsObserver;
+
+    new-instance v9, Landroid/os/Handler;
+
+    invoke-direct {v9}, Landroid/os/Handler;-><init>()V
+
+    invoke-direct {v10, v0, v9}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar$SettingsObserver;-><init>(Lcom/android/systemui/statusbar/phone/PhoneStatusBar;Landroid/os/Handler;)V
+
+    invoke-virtual {v10}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar$SettingsObserver;->observe()V
+
     iget-object v0, v0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mStatusBarWindow:Lcom/android/systemui/statusbar/phone/StatusBarWindowView;
 
     move-object/from16 v26, v0
@@ -14038,6 +14049,14 @@
     invoke-super {p0}, Lcom/android/systemui/statusbar/BaseStatusBar;->start()V
 
     invoke-direct {p0}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->addNavigationBar()V
+
+    new-instance v0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar$SettingsObserver;
+
+    iget-object v1, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mHandler:Lcom/android/systemui/statusbar/BaseStatusBar$H;
+
+    invoke-direct {v0, p0, v1}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar$SettingsObserver;-><init>(Lcom/android/systemui/statusbar/phone/PhoneStatusBar;Landroid/os/Handler;)V
+
+    invoke-virtual {v0}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar$SettingsObserver;->observe()V
 
     new-instance v0, Lcom/android/systemui/statusbar/phone/PhoneStatusBarPolicy;
 

@@ -149,6 +149,8 @@
 
 .field mBluetoothController:Lcom/android/systemui/statusbar/policy/BluetoothController;
 
+.field private mBrightnessControl:Z
+
 .field mBrightness:Lcom/android/systemui/statusbar/policy/BrightnessController;
 
 .field private mBrightnessEnableObserver:Lcom/android/systemui/statusbar/phone/PhoneStatusBar$BrightnessEnableObserver;
@@ -267,6 +269,10 @@
 
 .field mIconSize:I
 
+.field mInitialTouchX:I
+
+.field mInitialTouchY:I
+
 .field private mIntruderAlertView:Lcom/android/systemui/statusbar/policy/IntruderAlertView;
 
 .field mIsDisplaySearchPanel:Z
@@ -277,6 +283,8 @@
 
 .field private mIsTransparentStatusBar:Z
 
+.field private mJustPeeked:Z
+
 .field private mKidsModeActivated:Z
 
 .field private mKidsModeObserver:Lcom/android/systemui/statusbar/phone/PhoneStatusBar$KidsModeObserver;
@@ -285,13 +293,19 @@
 
 .field private mLightsOutAnimation:Landroid/animation/Animator;
 
+.field mLinger:I
+
 .field mLocationController:Lcom/android/systemui/statusbar/policy/LocationController;
+
+.field mLongPressBrightnessChange:Ljava/lang/Runnable;
 
 .field private mLongLifeModeActivated:Z
 
 .field private mLongLifeModeObserver:Lcom/android/systemui/statusbar/phone/PhoneStatusBar$LongLifeModeObserver;
 
 .field private final mMakeIconsInvisible:Landroid/animation/Animator$AnimatorListener;
+
+.field private mMinBrightness:I
 
 .field private mMiniModeAppsPanel:Landroid/view/ViewGroup;
 
@@ -353,6 +367,8 @@
 
 .field mPixelFormat:I
 
+.field private mPeekHeight:I
+
 .field mPositionTmp:[I
 
 .field mPostCollapseCleanup:Ljava/lang/Runnable;
@@ -364,6 +380,8 @@
 .field mQueueLock:Ljava/lang/Object;
 
 .field private mRecentsClickListener:Landroid/view/View$OnClickListener;
+
+.field private mScreenWidth:F
 
 .field mScrollView:Landroid/widget/ScrollView;
 
@@ -612,6 +630,12 @@
 
     iput-object v0, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mMakeIconsInvisible:Landroid/animation/Animator$AnimatorListener;
 
+    new-instance v0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar$Brightness;
+
+    invoke-direct {v0, p0}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar$Brightness;-><init>(Lcom/android/systemui/statusbar/phone/PhoneStatusBar;)V
+
+    iput-object v0, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mLongPressBrightnessChange:Ljava/lang/Runnable;
+
     iput-boolean v3, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mUserSetup:Z
 
     new-instance v0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar$2;
@@ -785,6 +809,18 @@
     iget v0, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mCurrentUserId:I
 
     return v0
+.end method
+
+.method static synthetic access$001(Lcom/android/systemui/statusbar/phone/PhoneStatusBar;I)V
+    .locals 0
+    .parameter "x0"
+    .parameter "x1"
+
+    .prologue
+    .line 137
+    invoke-direct {p0, p1}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->adjustBrightness(I)V
+
+    return-void
 .end method
 
 .method static synthetic access$100(Lcom/android/systemui/statusbar/phone/PhoneStatusBar;)Z
@@ -977,6 +1013,18 @@
     .locals 0
 
     iput-boolean p1, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mSuppressStatusBarDrags:Z
+
+    return p1
+.end method
+
+.method static synthetic access$301(Lcom/android/systemui/statusbar/phone/PhoneStatusBar;Z)Z
+    .locals 0
+    .parameter "x0"
+    .parameter "x1"
+
+    .prologue
+    .line 137
+    iput-boolean p1, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mBrightnessControl:Z
 
     return p1
 .end method
@@ -1573,6 +1621,137 @@
     return-void
 .end method
 
+.method private adjustBrightness(I)V
+    .locals 4
+    .parameter
+
+    .prologue
+    const v2, 0x3e19999a
+
+    .line 2554
+    int-to-float v0, p1
+
+    iget v1, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mScreenWidth:F
+
+    div-float/2addr v0, v1
+
+    .line 2558
+    const v1, 0x3f59999a
+
+    invoke-static {v2, v0}, Ljava/lang/Math;->max(FF)F
+
+    move-result v0
+
+    invoke-static {v1, v0}, Ljava/lang/Math;->min(FF)F
+
+    move-result v0
+
+    .line 2560
+    sub-float/2addr v0, v2
+
+    const v1, 0x3f333333
+
+    div-float/2addr v0, v1
+
+    .line 2563
+    iget v1, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mMinBrightness:I
+
+    iget v2, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mMinBrightness:I
+
+    rsub-int v2, v2, 0xff
+
+    int-to-float v2, v2
+
+    mul-float/2addr v0, v2
+
+    invoke-static {v0}, Ljava/lang/Math;->round(F)I
+
+    move-result v0
+
+    add-int/2addr v0, v1
+
+    .line 2565
+    const/16 v1, 0xff
+
+    invoke-static {v0, v1}, Ljava/lang/Math;->min(II)I
+
+    move-result v0
+
+    .line 2566
+    iget v1, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mMinBrightness:I
+
+    invoke-static {v0, v1}, Ljava/lang/Math;->max(II)I
+
+    move-result v0
+
+    .line 2569
+    :try_start_0
+    const-string v1, "power"
+
+    invoke-static {v1}, Landroid/os/ServiceManager;->getService(Ljava/lang/String;)Landroid/os/IBinder;
+
+    move-result-object v1
+
+    invoke-static {v1}, Landroid/os/IPowerManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/IPowerManager;
+
+    move-result-object v1
+
+    .line 2571
+    if-eqz v1, :cond_0
+
+    .line 2572
+    invoke-interface {v1, v0}, Landroid/os/IPowerManager;->setTemporaryScreenBrightnessSettingOverride(I)V
+
+    .line 2573
+    iget-object v1, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mContext:Landroid/content/Context;
+
+    invoke-virtual {v1}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
+
+    move-result-object v1
+
+    const-string v2, "screen_brightness"
+
+    const/4 v3, -0x2
+
+    invoke-static {v1, v2, v0, v3}, Landroid/provider/Settings$System;->putIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)Z
+    :try_end_0
+    .catch Landroid/os/RemoteException; {:try_start_0 .. :try_end_0} :catch_0
+
+    .line 2579
+    :cond_0
+    :goto_0
+    return-void
+
+    .line 2576
+    :catch_0
+    move-exception v0
+
+    .line 2577
+    const-string v1, "PhoneStatusBar"
+
+    new-instance v2, Ljava/lang/StringBuilder;
+
+    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v3, "Setting Brightness failed: "
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    invoke-virtual {v2, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v0
+
+    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-static {v1, v0}, Landroid/util/Slog;->w(Ljava/lang/String;Ljava/lang/String;)I
+
+    goto :goto_0
+.end method
+
 .method private areLightsOn()Z
     .locals 1
 
@@ -1613,6 +1792,166 @@
 
     :catch_0
     move-exception v0
+
+    goto :goto_0
+.end method
+
+.method private brightnessControl(Landroid/view/MotionEvent;)V
+    .locals 10
+
+    const/4 v8, 0x1
+
+    const/4 v7, 0x0
+
+    invoke-virtual {p1}, Landroid/view/MotionEvent;->getAction()I
+
+    move-result v0
+
+    invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawX()F
+
+    move-result v6
+
+    float-to-int v2, v6
+
+    invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawY()F
+
+    move-result v6
+
+    float-to-int v4, v6
+
+    if-nez v0, :cond_1
+
+    iget v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mNotificationHeaderHeight:I
+
+    if-ge v4, v6, :cond_0
+
+    iput v7, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mLinger:I
+
+    iput v2, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mInitialTouchX:I
+
+    iput v4, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mInitialTouchY:I
+
+    iput-boolean v8, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mJustPeeked:Z
+
+    iget-object v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mHandler:Lcom/android/systemui/statusbar/BaseStatusBar$H;
+
+    iget-object v7, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mLongPressBrightnessChange:Ljava/lang/Runnable;
+
+    invoke-virtual {v6, v7}, Lcom/android/systemui/statusbar/BaseStatusBar$H;->removeCallbacks(Ljava/lang/Runnable;)V
+
+    iget-object v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mHandler:Lcom/android/systemui/statusbar/BaseStatusBar$H;
+
+    iget-object v7, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mLongPressBrightnessChange:Ljava/lang/Runnable;
+
+    const-wide/16 v8, 0x2ee
+
+    invoke-virtual {v6, v7, v8, v9}, Lcom/android/systemui/statusbar/BaseStatusBar$H;->postDelayed(Ljava/lang/Runnable;J)Z
+
+    :cond_0
+    :goto_0
+    return-void
+
+    :cond_1
+    const/4 v6, 0x2
+
+    if-ne v0, v6, :cond_7
+
+    iget v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mNotificationHeaderHeight:I
+
+    if-ge v4, v6, :cond_5
+
+    iget-boolean v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mJustPeeked:Z
+
+    if-eqz v6, :cond_5
+
+    iget v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mLinger:I
+
+    const/16 v7, 0x14
+
+    if-le v6, v7, :cond_2
+
+    invoke-direct {p0, v2}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->adjustBrightness(I)V
+
+    goto :goto_0
+
+    :cond_2
+    iget v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mInitialTouchX:I
+
+    sub-int v6, v2, v6
+
+    invoke-static {v6}, Ljava/lang/Math;->abs(I)I
+
+    move-result v3
+
+    iget v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mInitialTouchY:I
+
+    sub-int v6, v4, v6
+
+    invoke-static {v6}, Ljava/lang/Math;->abs(I)I
+
+    move-result v5
+
+    iget-object v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mContext:Landroid/content/Context;
+
+    invoke-static {v6}, Landroid/view/ViewConfiguration;->get(Landroid/content/Context;)Landroid/view/ViewConfiguration;
+
+    move-result-object v6
+
+    invoke-virtual {v6}, Landroid/view/ViewConfiguration;->getScaledTouchSlop()I
+
+    move-result v1
+
+    if-le v3, v5, :cond_3
+
+    iget v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mLinger:I
+
+    add-int/lit8 v6, v6, 0x1
+
+    iput v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mLinger:I
+
+    :cond_3
+    if-gt v3, v1, :cond_4
+
+    if-le v5, v1, :cond_0
+
+    :cond_4
+    iget-object v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mHandler:Lcom/android/systemui/statusbar/BaseStatusBar$H;
+
+    iget-object v7, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mLongPressBrightnessChange:Ljava/lang/Runnable;
+
+    invoke-virtual {v6, v7}, Lcom/android/systemui/statusbar/BaseStatusBar$H;->removeCallbacks(Ljava/lang/Runnable;)V
+
+    goto :goto_0
+
+    :cond_5
+    iget v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mPeekHeight:I
+
+    if-le v4, v6, :cond_6
+
+    iput-boolean v7, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mJustPeeked:Z
+
+    :cond_6
+    iget-object v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mHandler:Lcom/android/systemui/statusbar/BaseStatusBar$H;
+
+    iget-object v7, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mLongPressBrightnessChange:Ljava/lang/Runnable;
+
+    invoke-virtual {v6, v7}, Lcom/android/systemui/statusbar/BaseStatusBar$H;->removeCallbacks(Ljava/lang/Runnable;)V
+
+    goto :goto_0
+
+    :cond_7
+    if-eq v0, v8, :cond_8
+
+    const/4 v6, 0x3
+
+    if-ne v0, v6, :cond_0
+
+    :cond_8
+    iget-object v6, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mHandler:Lcom/android/systemui/statusbar/BaseStatusBar$H;
+
+    iget-object v7, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mLongPressBrightnessChange:Ljava/lang/Runnable;
+
+    invoke-virtual {v6, v7}, Lcom/android/systemui/statusbar/BaseStatusBar$H;->removeCallbacks(Ljava/lang/Runnable;)V
 
     goto :goto_0
 .end method
@@ -7826,34 +8165,50 @@
 .method public interceptTouchEvent(Landroid/view/MotionEvent;)Z
     .locals 3
 
-    const/4 v1, 0x1
+    const/4 v0, 0x1
 
     invoke-virtual {p1}, Landroid/view/MotionEvent;->getActionMasked()I
 
-    move-result v0
+    move-result v1
 
     iget-boolean v2, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mSuppressStatusBarDrags:Z
 
-    if-eqz v2, :cond_0
-
-    :goto_0
-    return v1
+    if-eqz v2, :cond_1
 
     :cond_0
-    if-ne v0, v1, :cond_1
+    :goto_0
+    return v0
+
+    :cond_1
+    if-ne v1, v0, :cond_3
 
     iget-boolean v1, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mClingShown:Z
 
-    if-nez v1, :cond_1
+    if-nez v1, :cond_3
 
     invoke-virtual {p0}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->showCling()V
 
     :goto_1
-    const/4 v1, 0x0
+    iget-boolean v1, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mBrightnessControl:Z
+
+    if-eqz v1, :cond_2
+
+    invoke-direct {p0, p1}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->brightnessControl(Landroid/view/MotionEvent;)V
+
+    iget v1, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mDisabled:I
+
+    const/high16 v2, 0x1
+
+    and-int/2addr v1, v2
+
+    if-nez v1, :cond_0
+
+    :cond_2
+    const/4 v0, 0x0
 
     goto :goto_0
 
-    :cond_1
+    :cond_3
     invoke-virtual {p0}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->hideCling()V
 
     goto :goto_1
@@ -8121,6 +8476,14 @@
     move-result v3
 
     iput v3, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mNotificationHeaderHeight:I
+
+    const v3, 0x7f0e0063  ####     <public type="dimen" name="peek_height"
+
+    invoke-virtual {v2, v3}, Landroid/content/res/Resources;->getDimensionPixelSize(I)I
+
+    move-result v3
+
+    iput v3, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mPeekHeight:I
 
     const v3, 0x7f0e0041
 
@@ -8710,9 +9073,37 @@
 
     move-result-object v17
 
-    invoke-virtual/range {p0 .. p0}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->updateDisplaySize()V
+    invoke-virtual {v6}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
 
-    invoke-virtual/range {p0 .. p0}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->loadDimens()V
+    move-result-object v0
+
+    move-object/from16 v2, p0
+
+    invoke-virtual {v0}, Landroid/content/res/Resources;->getDisplayMetrics()Landroid/util/DisplayMetrics;
+
+    move-result-object v0
+
+    iget v0, v0, Landroid/util/DisplayMetrics;->widthPixels:I
+
+    int-to-float v0, v0
+
+    iput v0, v2, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mScreenWidth:F
+
+    invoke-virtual {v6}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
+
+    move-result-object v0
+
+    const v1, 0x10e002b  ####    <public type="integer" name="config_screenBrightnessDim"
+
+    invoke-virtual {v0, v1}, Landroid/content/res/Resources;->getInteger(I)I
+
+    move-result v0
+
+    iput v0, v2, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mMinBrightness:I
+
+    invoke-virtual {v2}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->updateDisplaySize()V
+
+    invoke-virtual {v2}, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->loadDimens()V
 
     const v26, 0x7f0e0017
 

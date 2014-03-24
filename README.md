@@ -1,2 +1,2 @@
-TWSystemUI.apk
+TW SystemUI Mods
 ==============
